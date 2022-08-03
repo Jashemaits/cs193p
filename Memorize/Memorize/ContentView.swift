@@ -11,8 +11,16 @@ struct ContentView: View {
     @ObservedObject var viewMoel: EmojiMemoryGame
     
     var body: some View {
-     
             ScrollView {
+                HStack(alignment: .center){
+                    Text(viewMoel.themeName).font(.largeTitle)
+                    Spacer()
+                    Text("\(viewMoel.score)")
+                    Spacer()
+                    Button(action: viewMoel.startNewGame) {
+                        Text("New Game")
+                    }
+                }
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 65))]) {
                     ForEach(viewMoel.cards) { card in
                         CardView(card: card)
@@ -23,7 +31,7 @@ struct ContentView: View {
                     }
                 }
             }
-            .foregroundColor(.red)
+            .foregroundColor(viewMoel.ThemeColor)
     }
 }
 
