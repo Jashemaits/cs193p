@@ -10,6 +10,7 @@ import SwiftUI
 struct EmojiArtDocumentView: View {
     @ObservedObject var document: EmojiArtDocument
     let defaultEmojiFontSize: CGFloat = 40
+    @State var selectedEmoji = Set<EmojiArtModel.Emoji>()
     
     var body: some View {
         VStack(spacing: 0){
@@ -33,8 +34,13 @@ struct EmojiArtDocumentView: View {
                     ForEach(document.emojis) { emoji in
                         Text(emoji.text)
                             .font(.system(size: fontSize(for: emoji)))
+                            .selection(selectedItems: selectedEmoji, item: emoji)
                             .scaleEffect(zoomScale)
                             .position(position(for: emoji, in: geometry))
+                            .onTapGesture {
+                                selectedEmoji.toggleMembership(of: emoji)
+                            }
+                            .gesture(emojiPanGesture())
                     }
                 }
             }
@@ -42,7 +48,7 @@ struct EmojiArtDocumentView: View {
             .onDrop(of: [.plainText, .url, .image], isTargeted: nil) { providers, location in
                 drop(providers: providers, at: location, in: geometry)
             }
-            .gesture(panGesture().simultaneously(with: zoomGesture()))
+            .gesture(panGesture().simultaneously(with: zoomGesture().exclusively(before: tapToDeselect())))
         }
     }
     
@@ -103,6 +109,23 @@ struct EmojiArtDocumentView: View {
             }
     }
     
+    @GestureState private var gestureEmojiPanOffset: CGSize = CGSize.zero
+    
+    private func emojiPanGesture() -> some Gesture {
+        DragGesture()
+//            .updating($gestureEmojiPanOffset) { latestDragGestureValue, gestureEmojiPanOffset, _ in
+//                gestureEmojiPanOffset = latestDragGestureValue.translation
+//                for emoji in selectedEmoji {
+//                    document.moveEmoji(emoji, by: gestureEmojiPanOffset)
+//                }
+//            }
+            .onEnded { finalDragGestureValue in
+                for emoji in selectedEmoji {
+                    document.moveEmoji(emoji, by: finalDragGestureValue.translation)
+                }
+            }
+    }
+    
     @State private var steadyStateZoomScale: CGFloat = 1
     @GestureState private var gestureZoomScale: CGFloat = 1
     
@@ -116,6 +139,13 @@ struct EmojiArtDocumentView: View {
                 withAnimation {
                     zoomToFIt(document.backgroundImage, in: size)
                 }
+            }
+    }
+    
+    private func tapToDeselect() -> some Gesture {
+        TapGesture()
+            .onEnded {
+                selectedEmoji  = Set()
             }
     }
     
