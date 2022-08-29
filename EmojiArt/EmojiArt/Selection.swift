@@ -7,12 +7,12 @@
 
 import SwiftUI
 
-struct Selection<T>: ViewModifier where T : Hashable, T : Identifiable {
-    var selectedItems: Set<T>
-    var item: T
+struct Selection: ViewModifier {
+    var selectedItems: Set<EmojiArtModel.Emoji>
+    var item: EmojiArtModel.Emoji
     
     func body(content: Content) -> some View {
-        if selectedItems.contains(item) {
+        if selectedItems.contains(where: {$0.id == item.id}) {
             content.border(.black, width: 1)
         }
         content
@@ -20,7 +20,7 @@ struct Selection<T>: ViewModifier where T : Hashable, T : Identifiable {
 }
 
 extension View {
-    func selection<T>(selectedItems: Set<T>, item: T) -> some View where T:  Hashable, T : Identifiable {
-        self.modifier(Selection(selectedItems: selectedItems, item: item))
+    func selection(selectedItems: Set<EmojiArtModel.Emoji>, item: EmojiArtModel.Emoji) -> some View {
+        return modifier(Selection(selectedItems: selectedItems, item: item))
     }
 }

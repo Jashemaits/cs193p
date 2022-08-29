@@ -115,13 +115,19 @@ struct EmojiArtDocumentView: View {
         DragGesture()
 //            .updating($gestureEmojiPanOffset) { latestDragGestureValue, gestureEmojiPanOffset, _ in
 //                gestureEmojiPanOffset = latestDragGestureValue.translation
+//                print("lol")
+//                print(latestDragGestureValue.translation)
 //                for emoji in selectedEmoji {
 //                    document.moveEmoji(emoji, by: gestureEmojiPanOffset)
 //                }
 //            }
             .onEnded { finalDragGestureValue in
-                for emoji in selectedEmoji {
-                    document.moveEmoji(emoji, by: finalDragGestureValue.translation)
+                print("pol")
+                print(finalDragGestureValue.translation)
+                withAnimation {
+                    for emoji in selectedEmoji {
+                        document.moveEmoji(emoji, by: finalDragGestureValue.translation)
+                    }
                 }
             }
     }
