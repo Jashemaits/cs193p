@@ -10,14 +10,58 @@ import SwiftUI
 class EmojiArtDocument: ObservableObject {
     @Published private(set) var emojiArt: EmojiArtModel {
         didSet {
+            scheduleAutoSave()
             if emojiArt.background != oldValue.background {
                 fetchBackgroundImageDataIfNecessary()
             }
         }
     }
     
+    private var autoSaveTimer: Timer?
+    
+    private func scheduleAutoSave() {
+        autoSaveTimer?.invalidate()
+        autoSaveTimer = Timer.scheduledTimer(withTimeInterval: AutoSave.colescingInterval, repeats: false) { _ in
+            self.autoSave()
+        }
+    }
+    
+    private struct AutoSave {
+        static let fileName = "AutoSaved.emojirt"
+        static var url: URL? {
+            let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+            return documentDirectory?.appendingPathComponent(fileName)
+        }
+        static let colescingInterval = 5.0
+    }
+    
+    private func autoSave() {
+        if let url = AutoSave.url {
+            save(to: url)
+        }
+    }
+    
+    private func save(to url: URL) {
+        let thisFunction = "\(String(describing: self)).\(#function)"
+        do {
+            let data: Data = try emojiArt.json()
+            try data.write(to: url)
+            print("\(thisFunction) success!")
+        } catch let encodingError where encodingError is EncodingError {
+            print("\(thisFunction) couldn't encode EmojiArt as JSON because \(encodingError.localizedDescription)")
+        }
+        catch {
+            print("\(thisFunction) error = \(error)")
+        }
+    }
+    
     init( ) {
-        emojiArt = EmojiArtModel()
+        if let url = AutoSave.url, let autoSavedEmojiArt = try? EmojiArtModel(url: url) {
+            emojiArt =  autoSavedEmojiArt
+            fetchBackgroundImageDataIfNecessary()
+        } else {
+            emojiArt = EmojiArtModel()
+        }
     }
     
     var emojis: [EmojiArtModel.Emoji] { emojiArt.emojis }
