@@ -19,7 +19,7 @@ struct Palette:  Identifiable, Codable {
     }
 }
 
-class PalleteStore: ObservableObject {
+class PaletteStore: ObservableObject {
     let name: String
     
     @Published var palettes = [Palette]() {
