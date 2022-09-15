@@ -12,7 +12,7 @@ struct PaletteChooser: View {
     var emojiFont: Font { .system(size: emojiFontSize) }
     
     @EnvironmentObject var store: PaletteStore
-    @State var  chosenIndex = 0
+    @SceneStorage("PaletteChooser.chosenIndex") var  chosenIndex = 0
     
     var body: some View {
         HStack {
